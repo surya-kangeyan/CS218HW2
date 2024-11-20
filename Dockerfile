@@ -1,32 +1,33 @@
-# Stage 1: Build the Go application
+# Use the official Golang image to build the app
 FROM golang:1.17-alpine AS builder
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy go.mod and go.sum files to leverage Docker cache
-COPY go.mod ./
+# Copy go.mod and go.sum files
+COPY go.mod go.sum ./
 
 # Download dependencies
 RUN go mod download
 
-# Copy the rest of the application source code
+# Copy the source code
 COPY . .
 
-# Build the Go application
+# Build the application
 RUN go build -o sys-monitor .
 
-# Stage 2: Create a minimal image for running the application
+# Use a minimal image for running the app
 FROM alpine:latest
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /root/
 
 # Copy the binary from the builder stage
 COPY --from=builder /app/sys-monitor .
 
-# Expose the port the application listens on
+# Expose the application's port
 EXPOSE 8080
 
 # Command to run the executable
 CMD ["./sys-monitor"]
+
